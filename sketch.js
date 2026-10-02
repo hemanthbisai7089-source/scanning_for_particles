@@ -1,135 +1,132 @@
 const r = require("raylib");
-
-const WIDTH = 300;
-const HEIGHT = 200;
+// const geometry = require("./geometry");
+const WIDTH = 1000;
+const HEIGHT = 800;
 const FPS = 60;
+const TITLE = "scanning for particles";
+
+let d1 = {};
+let d2 = {};
+
+d1.x = 0;
+d1.y = 0;
+d1.velocity = 1;
+d1.start = d1.x;
+d1.width = 80;
+d1.range = WIDTH / 2;
+
+d2.range = WIDTH / 2;
+d2.x = WIDTH / 2;
+d2.y = 0;
+d2.velocity = 1.5;
+d2.start = d2.x;
+d2.width = 80;
 
 function setup() {
   r.SetTraceLogLevel(r.LOG_NONE);
-  r.InitWindow(WIDTH, HEIGHT, "scanning for particles");
+  r.InitWindow(WIDTH, HEIGHT, TITLE);
   r.SetTargetFPS(FPS);
 }
+
 function running() {
   return !r.WindowShouldClose();
 }
-function detectorPosition(
-  axis,
-  range,
-  detectorStart,
-  detectorEnd,
-  previousState,
-) {
-  if (axis + range >= detectorEnd) {
-    return true;
-  }
-  if (axis <= detectorStart) {
-    return false;
-  }
-  return previousState;
-}
-function speed(detectorReached, speed) {
-  if (detectorReached) return speed * -1;
-  return speed;
-}
-
-let detectorOneX = 0;
-let detectorTwoX = WIDTH / 2 + 1;
-
-let detectorOneY = 0;
-let detectorTwoY = 0;
-
-let detectorOneReached = false;
-let detectorTwoReached = false;
-
-const detectorOneStart = detectorOneX;
-const detectorTwoStart = detectorTwoX;
-
-const detectorOneWidth = 20;
-const detectorTwoWidth = 20;
 
 function update() {
-  const detectorOneEnd = WIDTH / 2;
-  const detectorTwoEnd = WIDTH;
+  d1.velocity = isInBounds(
+    d1.x,
+    d1.width - d1.width,
+    d1.start,
+    d1.range - d1.width,
+  )
+    ? d1.velocity
+    : -d1.velocity;
+  d2.velocity = isInBounds(
+    d2.x,
+    d2.width - d2.width,
+    d2.start,
+    d2.range - d2.width,
+  )
+    ? d2.velocity
+    : -d2.velocity;
 
-  const detectorOneSpeed = 1;
-  const detectorTwoSpeed = 3;
-
-  detectorOneReached = detectorPosition(
-    detectorOneX,
-    detectorOneWidth,
-    detectorOneStart,
-    detectorOneEnd,
-    detectorOneReached,
-  );
-  detectorTwoReached = detectorPosition(
-    detectorTwoX,
-    detectorTwoWidth,
-    detectorTwoStart,
-    detectorTwoEnd,
-    detectorTwoReached,
-  );
-
-  detectorOneX += speed(detectorOneReached, detectorOneSpeed);
-  detectorTwoX += speed(detectorTwoReached, detectorTwoSpeed);
+  d1.x += d1.velocity;
+  d2.x += d2.velocity;
 }
 
-function overlapCheck(
-  particleAxis,
-  particleRange,
-  detectorAxis,
-  detectorRange,
-) {
-  const atParticle =
-    detectorAxis + detectorRange >= particleAxis &&
-    detectorAxis <= particleRange + particleAxis;
+function isInBounds(start1, width1, start2, width2) {
+  const end1 = start1 + width1;
+  const end2 = start2 + width2;
 
-  if (atParticle) return r.Fade(r.RED, 0.7);
-  return r.WHITE;
+  return !(end2 < start1 || start2 > end1);
 }
+function getcolor(overlaped) {
+  return overlaped ? r.RED : r.WHITE;
+}
+
 function draw() {
-  const particle1X = 100;
-  const particle1Y = 0;
-  const particle1Width = 50;
+  const particle1 = { x: WIDTH / 3, y: 0, width: 70, height: HEIGHT };
+  const particle2 = { x: (WIDTH / 4) * 3, y: 0, width: 100, height: HEIGHT };
 
-  const particle2X = 200;
-  const particle2Y = 0;
-  const particle2Width = 5;
+  const detector1 = { x: d1.x, y: d1.y, width: d1.width, height: HEIGHT };
+  const detector2 = {
+    x: d2.x,
+    y: d2.y,
+    width: d2.width,
+    height: HEIGHT,
+  };
+  const paricleColor = r.BLUE;
 
-  const detectorOneColor = overlapCheck(
-    particle1X,
-    particle1Width,
-    detectorOneX,
-    detectorOneWidth,
-  );
-  const detectorTwoColor = overlapCheck(
-    particle2X,
-    particle2Width,
-    detectorTwoX,
-    detectorTwoWidth,
-  );
+  const detectorRoundness = 0.8;
+  const detectorSegements = 8;
+
+  const detectorOneDetected =
+    isInBounds(particle1.x, particle1.width, d1.x, d1.width) ||
+    isInBounds(particle2.x, particle2.width, d1.x, d1.width);
+
+  const detectorTwoDtected =
+    isInBounds(particle2.x, particle2.width, d2.x, d2.width) ||
+    isInBounds(particle1.x, particle1.width, d2.x, d2.width);
+
+  const detectorOneColor = getcolor(detectorOneDetected);
+  const detectorTwoColor = getcolor(detectorTwoDtected);
+
+  const blinkingSpeed = 6;
 
   r.BeginDrawing();
   r.ClearBackground(r.BLACK);
 
-  r.DrawRectangle(particle2X, particle2Y, particle2Width, HEIGHT, r.BLUE);
-  r.DrawRectangle(particle1X, particle1Y, particle1Width, HEIGHT, r.BLUE);
+  r.DrawText("Hemanth", 10, 150, 10, r.GREEN);
 
-  r.DrawRectangle(
-    detectorOneX,
-    detectorOneY,
-    detectorOneWidth,
-    HEIGHT,
+  r.DrawRectangleRec(particle1, paricleColor);
+  r.DrawRectangleRec(particle2, paricleColor);
+
+  r.DrawRectangleRounded(
+    detector1,
+    detectorRoundness,
+    detectorSegements,
     detectorOneColor,
   );
-  r.DrawRectangle(
-    detectorTwoX,
-    detectorTwoY,
-    detectorTwoWidth,
-    HEIGHT,
+
+  r.DrawRectangleRounded(
+    detector2,
+    detectorRoundness,
+    detectorSegements,
     detectorTwoColor,
   );
 
+  if (detectorOneDetected || detectorTwoDtected) {
+    r.DrawText("Warning ! ", WIDTH / 2 - 80, 5, 60, r.RED);
+  }
+
+  d1.blinker = blinkCheck(d1.blinker, detectorOneDetected, blinkingSpeed);
+  d2.blinker = blinkCheck(d2.blinker, detectorTwoDtected, blinkingSpeed);
   r.EndDrawing();
+}
+function blinkCheck(blinker, detectorDetected, blinkingSpeed) {
+  return !detectorDetected || blinker === blinkingSpeed
+    ? (blinker = 0)
+    : ++blinker;
 }
 
 function teardown() {

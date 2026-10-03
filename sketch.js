@@ -20,15 +20,17 @@ let p2;
 function running() {
   return !r.WindowShouldClose();
 }
+function doEverything(d, p1, p2) {
+  d.nextPosition(d1);
+  draw(d, p1, p2);
+}
 
 function update() {
-  d.nextPosition(d1);
-  d.nextPosition(d2);
+  doEverything(d1, p1, p2);
 }
 
 function draw() {
   d.getColor(p1, p2, d1);
-  d.getColor(p1, p2, d2);
 
   r.BeginDrawing();
   r.ClearBackground(r.BLACK);
@@ -36,10 +38,28 @@ function draw() {
   p.draw(p1);
   p.draw(p2);
   d.draw(d1);
-  d.draw(d2);
 
   r.EndDrawing();
 }
+// function update() {
+//   d.nextPosition(d1);
+//   d.nextPosition(d2);
+// }
+
+// function draw() {
+//   d.getColor(p1, p2, d1);
+//   d.getColor(p1, p2, d2);
+
+//   r.BeginDrawing();
+//   r.ClearBackground(r.BLACK);
+
+//   p.draw(p1);
+//   p.draw(p2);
+//   d.draw(d1);
+//   d.draw(d2);
+
+//   r.EndDrawing();
+// }
 
 function teardown() {
   r.CloseWindow();

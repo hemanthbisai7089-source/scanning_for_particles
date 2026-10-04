@@ -1,9 +1,9 @@
 const sketch = require("./sketch");
 
-function loop() {
+function loop(world) {
   while (sketch.running()) {
-    sketch.update();
-    sketch.draw();
+    sketch.update(world);
+    sketch.draw(world);
   }
 }
 
@@ -12,8 +12,8 @@ function main() {
   const HEIGHT = 800;
   const FPS = 60;
   const TITLE = "scanning for particles";
-  sketch.setup(WIDTH, HEIGHT, TITLE, FPS);
-  loop();
+  const world = sketch.setup(WIDTH, HEIGHT, TITLE, FPS);
+  loop(world);
   sketch.teardown();
 }
 

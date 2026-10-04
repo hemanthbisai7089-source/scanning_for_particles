@@ -7,36 +7,36 @@ function setup(WIDTH, HEIGHT, TITLE, FPS) {
   r.InitWindow(WIDTH, HEIGHT, TITLE);
   r.SetTargetFPS(FPS);
 
-  d1 = d.createDetector(0, 80, r.GetScreenWidth() / 2, 1.5);
-  d2 = d.createDetector(r.GetScreenWidth() / 2, 80, r.GetScreenWidth(), 2.5);
-  p1 = p.createParticle(r.GetScreenWidth() / 3, 70, r.BLUE);
-  p2 = p.createParticle((r.GetScreenWidth() * 3) / 4, 100, r.BLUE);
+  world = {};
+  world.d1 = d.createDetector(0, 80, r.GetScreenWidth() / 2, 1.5);
+  world.d2 = d.createDetector(
+    r.GetScreenWidth() / 2,
+    80,
+    r.GetScreenWidth(),
+    2.5,
+  );
+  world.p1 = p.createParticle(r.GetScreenWidth() / 3, 70, r.BLUE);
+  world.p2 = p.createParticle((r.GetScreenWidth() * 3) / 4, 100, r.BLUE);
+  return world;
 }
-let d1;
-let d2;
-let p1;
-let p2;
 
 function running() {
   return !r.WindowShouldClose();
 }
 
-function update() {
-  d.nextPosition(d1);
-  d.nextPosition(d2);
+function update(world) {
+  d.update(world.d1, world.p1, world.p2);
+  d.update(world.d2, world.p1, world.p2);
 }
 
-function draw() {
-  d.getColor(p1, p2, d1);
-  d.getColor(p1, p2, d2);
-
+function draw(world) {
   r.BeginDrawing();
   r.ClearBackground(r.BLACK);
 
-  p.draw(p1);
-  p.draw(p2);
-  d.draw(d1);
-  d.draw(d2);
+  d.draw(world.p1);
+  d.draw(world.p2);
+  d.draw(world.d1);
+  d.draw(world.d2);
 
   r.EndDrawing();
 }

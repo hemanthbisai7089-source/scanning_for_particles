@@ -1,49 +1,54 @@
 const r = require("raylib");
 
 function isInBounds(detector) {
-  const end1 = detector.start.x + detector.size.width;
+  const end1 = detector.start + detector.size;
 
-  return !(end1 > detector.upper || detector.start.x < detector.lower);
+  return !(end1 > detector.upper || detector.start < detector.lower);
 }
-function nextPosition(d) {
+
+function update(d, p1, p2) {
   d.velocity = isInBounds(d) ? d.velocity : -d.velocity;
-  d.start.x += d.velocity;
+  d.start += d.velocity;
+  getColor(d, p1, p2);
+
   return d;
 }
 
-function hasDetected(particle, detector) {
-  const end1 = particle.x + particle.width;
-  const end2 = detector.start.x + detector.size.width;
+function hasDetected(detector, particle) {
+  const end1 = particle.start + particle.size;
+  const end2 = detector.start + detector.size;
 
-  return !(end2 < particle.x || detector.start.x > end1);
+  return !(end2 < particle.start || detector.start > end1);
 }
 
-function draw(d) {
-  drawRange(d.start, d.size, d.color);
-}
-
-function drawRange(start, size, color) {
-  r.DrawRectangle(start.x, start.y, size.width, size.height, color);
+function draw(object) {
+  r.DrawRectangle(
+    object.start,
+    0,
+    object.size,
+    r.GetScreenHeight(),
+    object.color,
+  );
+  return object;
 }
 
 function createDetector(start, size, upper, velocity) {
   return {
-    start: { x: start, y: 0 },
-    size: { width: size, height: r.GetScreenHeight() },
+    start: start,
+    size: size,
     lower: start,
     upper: upper,
     velocity: velocity,
   };
 }
-function getColor(p1, p2, d) {
-  d.color = hasDetected(p1, d) || hasDetected(p2, d) ? r.RED : r.WHITE;
-  // draw(d);
+
+function getColor(d, p1, p2) {
+  d.color = hasDetected(d, p1) || hasDetected(d, p2) ? r.RED : r.WHITE;
   return d;
 }
+
 module.exports = {
-  draw,
-  drawRange,
   createDetector,
-  getColor,
-  nextPosition,
+  update,
+  draw,
 };
